@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "budgetdrfbackend"
+version = "0.1.0"
+description = "A backend for the Budget project.7"
+authors = ["Elliot Redhead <elliot.redhead@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Django = "^4.0.5"
+djangorestframework = "^3.13.1"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^4.0.1"
+black = "^22.3.0"
+Werkzeug = "^2.1.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
