@@ -8,7 +8,7 @@ class Expense(models.Model):
     cost = models.DecimalField(decimal_places=2, max_digits=19, blank=False, null=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(default=now)
-    date_added = models.DateTimeField(auto_now_add=True)
+    date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):

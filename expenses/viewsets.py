@@ -11,7 +11,7 @@ class ExpenseViewSet(ModelViewSet):
     queryset = Expense.objects.all()
 
     def list(self, request):
-        queryset = Expense.objects.all().order_by("-date_added")
+        queryset = Expense.objects.all().order_by("-date_created")
         serializer = ExpenseSerializer(queryset, many=True)
         return Response(serializer.data)
 
