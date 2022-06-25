@@ -490,7 +490,7 @@ watchdog = ["watchdog"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "1451b73b6db4eb9bbb989cf970abcec5bea7caf650d993100a6f3518c4f000fe"
+content-hash = "73acedda73b86a0cfb12e028e6e42ff074f7fe14129cc2340d2cdb0ab0a67970"
 
 [metadata.files]
 asgiref = [
