@@ -11,6 +11,10 @@ addopts = """
 	--randomly-seed=16345
 	"""
 
+[tool.pydocstyle]
+inherit = false
+ignore = ["D100","D203"]
+
 [tool.poetry.dependencies]
 python = "^3.10"
 Django = "^4.0.5"
@@ -18,6 +22,7 @@ djangorestframework = "^3.13.1"
 pytest-django = "^4.5.2"
 pytz = "^2022.1"
 python-dotenv = "^0.20.0"
+django-filter = "^22.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
@@ -30,6 +35,7 @@ pytest-factoryboy = "^2.5.0"
 snapshottest = "^0.6.0"
 pytest-django = "^4.5.2"
 pytest-randomly = "^3.12.0"
+pydocstyle = {extras = ["toml"], version = "^6.1.1"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

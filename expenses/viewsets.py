@@ -1,22 +1,18 @@
-from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Expense
-from .serializers import ExpenseSerializer
+from expenses.filters import ExpenseFilterset
+
+from expenses.models import Expense
+from expenses.serializers import ExpenseSerializer
 
 
 class ExpenseViewSet(ModelViewSet):
+    """Viewset definition related to Expense model."""
+
     serializer_class = ExpenseSerializer
-    queryset = Expense.objects.all()
+    filterset_class = ExpenseFilterset
+    queryset = Expense.objects.all().order_by("-id")
 
-    def list(self, request):
-        queryset = Expense.objects.all().order_by("-date_created")
-        serializer = ExpenseSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = Expense.objects.all()
-        expense = get_object_or_404(queryset, pk=pk)
-        serializer = ExpenseSerializer(expense)
-        return Response(serializer.data)
+    def perform_create(self, serializer):
+        """Insert current user for related field on POST."""
+        return serializer.save(user=self.request.user)
