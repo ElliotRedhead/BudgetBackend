@@ -1,0 +1,262 @@
+openapi: 3.0.3
+info:
+  title: Budget Backend
+  version: 0.0.0
+  description: DRF backend for budget-management.
+paths:
+  /expenses/:
+    get:
+      operationId: expenses_list
+      description: Viewset definition related to Expense model.
+      parameters:
+      - in: query
+        name: cost__gt
+        schema:
+          type: number
+      - in: query
+        name: cost__lt
+        schema:
+          type: number
+      - in: query
+        name: date_range
+        schema:
+          type: string
+          format: date-time
+          enum:
+          - month
+          - today
+          - week
+          - year
+          - yesterday
+      - in: query
+        name: name__icontains
+        schema:
+          type: string
+      - in: query
+        name: user
+        schema:
+          type: integer
+      tags:
+      - expenses
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Expense'
+          description: ''
+    post:
+      operationId: expenses_create
+      description: Viewset definition related to Expense model.
+      tags:
+      - expenses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Expense'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Expense'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Expense'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+          description: ''
+  /expenses/{id}/:
+    get:
+      operationId: expenses_retrieve
+      description: Viewset definition related to Expense model.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this expense.
+        required: true
+      tags:
+      - expenses
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+          description: ''
+    put:
+      operationId: expenses_update
+      description: Viewset definition related to Expense model.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this expense.
+        required: true
+      tags:
+      - expenses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Expense'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Expense'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Expense'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+          description: ''
+    patch:
+      operationId: expenses_partial_update
+      description: Viewset definition related to Expense model.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this expense.
+        required: true
+      tags:
+      - expenses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedExpense'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedExpense'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedExpense'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+          description: ''
+    delete:
+      operationId: expenses_destroy
+      description: Viewset definition related to Expense model.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this expense.
+        required: true
+      tags:
+      - expenses
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    Expense:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          readOnly: true
+        name:
+          type: string
+          maxLength: 30
+        cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,17}(?:\.\d{0,2})?$
+        date:
+          type: string
+          format: date-time
+        date_created:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - cost
+      - date_created
+      - date_modified
+      - id
+      - name
+      - user
+    PatchedExpense:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          readOnly: true
+        name:
+          type: string
+          maxLength: 30
+        cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,17}(?:\.\d{0,2})?$
+        date:
+          type: string
+          format: date-time
+        date_created:
+          type: string
+          format: date-time
+          readOnly: true
+        date_modified:
+          type: string
+          format: date-time
+          readOnly: true
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
