@@ -1,10 +1,10 @@
 import json
 
-from django.contrib.auth.models import User
-
 import pytest
+from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from snapshottest import TestCase
+
 from tests.test_expenses.factories import ExpenseFactory
 
 

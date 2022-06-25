@@ -1,8 +1,9 @@
-from expenses.models import Expense
-import factory
-import pytz
 import datetime
 
+import factory
+import pytz
+
+from expenses.models import Expense
 from tests.test_budget.factories import UserFactory
 
 _EXPENSE_NAME_CHOICES = (

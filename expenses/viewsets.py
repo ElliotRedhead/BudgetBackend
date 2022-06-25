@@ -1,7 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 
 from expenses.filters import ExpenseFilterset
-
 from expenses.models import Expense
 from expenses.serializers import ExpenseSerializer
 
