@@ -2,7 +2,7 @@
 name = "budgetdrfbackend"
 version = "0.1.0"
 description = "A backend for the Budget project."
-authors = ["Elliot Redhead <elliot.redhead@gmail.com>"]
+authors = ["Elliot Redhead <elliot@elliotredhead.com>"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "budget.settings"
@@ -27,6 +27,7 @@ pytz = "^2022.1"
 python-dotenv = "^0.20.0"
 django-filter = "^22.1"
 drf-spectacular = "^0.22.1"
+django-cors-headers = "^3.13.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
