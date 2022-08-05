@@ -8,6 +8,8 @@ from expenses.serializers import ExpenseSerializer
 class ExpenseViewSet(ModelViewSet):
     """Viewset definition related to Expense model."""
 
+    permission_classes = []
+
     serializer_class = ExpenseSerializer
     filterset_class = ExpenseFilterset
     queryset = Expense.objects.all().order_by("-id")

@@ -11,6 +11,7 @@ router.registry.extend(expenses_router.registry)
 urlpatterns = [
     path("", include(router.urls)),
     path("admin/", admin.site.urls),
+    path("user/", include("user.urls")),
     path("api-auth/", include("rest_framework.urls")),
     path("schema/", SpectacularJSONAPIView.as_view(), name="schema"),
     path(
