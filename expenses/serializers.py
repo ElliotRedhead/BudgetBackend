@@ -4,7 +4,7 @@ from expenses.models import Expense
 
 
 class ExpenseSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source="user.username")
+    user = serializers.ReadOnlyField(source="user.email")
 
     class Meta:
         model = Expense
