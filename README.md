@@ -1,3 +1,5 @@
+![Django CI](https://github.com/ElliotRedhead/BudgetBackend/actions/workflows/django.yml/badge.svg)
+[![codecov](https://codecov.io/gh/elliotredhead/BudgetBackend/branch/main/graph/badge.svg)](https://codecov.io/gh/elliotredhead/BudgetBackend)
 # BudgetBackend
 
 A repository dedicated to Django Rest Framework (DRF) implementation of backend API for the Budget project.
