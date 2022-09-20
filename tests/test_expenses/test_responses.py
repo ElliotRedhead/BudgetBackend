@@ -1,11 +1,11 @@
 import json
 
 import pytest
-from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from snapshottest import TestCase
 
 from tests.test_expenses.factories import ExpenseFactory
+from user.models import User
 
 
 @pytest.mark.django_db
@@ -16,14 +16,16 @@ class TestExpenseResponses(TestCase):
         """Generate expense examples and instantiate APIClient."""
         self.client = APIClient()
         self.base_url = "/expenses/"
-        self.admin = User.objects.create_superuser(username="admin")
-        self.user = User.objects.create(username="user")
+        self.admin = User.objects.create_superuser(
+            email="admin@admin.com", password="P4ssw0rd123!"
+        )
+        self.user = User.objects.create(email="user@user.com")
 
     def test_expense_list_response_admin(self):
         """Match response of retrieving all expenses as admin."""
         ExpenseFactory.create_batch(5)
         self.client.force_authenticate(user=self.admin)
-        response = self.client.get(self.base_url)
+        response = self.client.get(f"{self.base_url}?scope=global")
 
         assert response.status_code == 200
         assert len(response.data) == 5
@@ -54,7 +56,7 @@ class TestExpenseResponses(TestCase):
         expenses = ExpenseFactory.create_batch(5)
         self.client.force_authenticate(user=self.admin)
         for expense_id in range(1, len(expenses) + 1):
-            response = self.client.get(f"{self.base_url}{expense_id}/")
+            response = self.client.get(f"{self.base_url}{expense_id}/?scope=global")
             assert response.status_code == 200
             self.assertMatchSnapshot(json.loads(response.content))
 

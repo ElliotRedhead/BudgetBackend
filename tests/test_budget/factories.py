@@ -1,11 +1,11 @@
 import factory
-from django.contrib.auth.models import User
+
+from user.models import User
 
 
 class UserFactory(factory.django.DjangoModelFactory):
-    username = factory.Faker("name")
-    password = factory.Faker("password")
     email = factory.Faker("email")
+    password = factory.Faker("password")
 
     class Meta:
         model = User
