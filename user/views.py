@@ -16,7 +16,15 @@ class RegisterView(APIView):
         if serializer.is_valid():
             user = get_user_model().objects.create_user(**serializer.validated_data)
             if user:
-                return Response(serializer.data, status=HTTP_201_CREATED)
+                refresh = TokenObtainPairSerializer.get_token(user)
+                return Response(
+                    {
+                        **serializer.data,
+                        "access": str(refresh.access_token),
+                        "refresh": str(refresh),
+                    },
+                    status=HTTP_201_CREATED,
+                )
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
 
