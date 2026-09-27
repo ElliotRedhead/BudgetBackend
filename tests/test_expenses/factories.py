@@ -1,7 +1,6 @@
 import datetime
 
 import factory
-import pytz
 
 from expenses.models import Expense
 from tests.test_budget.factories import UserFactory
@@ -24,10 +23,10 @@ class ExpenseFactory(factory.django.DjangoModelFactory):
     cost = factory.Faker("pyint", min_value=0, max_value=100000)
     user = factory.SubFactory(UserFactory)
     date = factory.Faker(
-        "date_time", tzinfo=pytz.UTC, end_datetime=datetime.date(2016, 5, 28)
+        "date_time", tzinfo=datetime.UTC, end_datetime=datetime.date(2016, 5, 28)
     )
-    date_created = factory.Faker("date_time", tzinfo=pytz.UTC)
-    date_modified = factory.Faker("date_time", tzinfo=pytz.UTC)
+    date_created = factory.Faker("date_time", tzinfo=datetime.UTC)
+    date_modified = factory.Faker("date_time", tzinfo=datetime.UTC)
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
