@@ -1,2 +1,7 @@
 .git
 .pytest_cache
+.venv
+.env
+db.sqlite3
+database
+**/__pycache__

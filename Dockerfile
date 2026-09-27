@@ -1,11 +1,11 @@
-FROM python:3.10-alpine
-ENV POETRY_VERSION=1.1.12 \
-	POETRY_VIRTUALENVS_IN_PROJECT=true
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+FROM python:3.14-slim
+COPY --from=ghcr.io/astral-sh/uv:0.12.19 /uv /uvx /bin/
+ENV PYTHONDONTWRITEBYTECODE=1 \
+	PYTHONUNBUFFERED=1 \
+	UV_PROJECT_ENVIRONMENT=/venv \
+	UV_PYTHON_DOWNLOADS=never \
+	PATH="/venv/bin:$PATH"
 WORKDIR /backend
-COPY pyproject.toml poetry.lock .env /backend/
-RUN pip install "poetry==$POETRY_VERSION"
+COPY pyproject.toml uv.lock /backend/
+RUN uv sync --locked
 COPY . /backend/
-RUN poetry config virtualenvs.create false
-RUN poetry install
