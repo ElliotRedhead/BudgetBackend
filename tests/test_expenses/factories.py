@@ -29,14 +29,18 @@ class ExpenseFactory(factory.django.DjangoModelFactory):
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
+        """Save the generated timestamps, then restore auto_now behaviour."""
         model_class.date_created.field.auto_now_add = False
         model_class.date_modified.field.auto_now = False
+        try:
+            if cls._meta.django_get_or_create:
+                return cls._get_or_create(model_class, *args, **kwargs)
 
-        if cls._meta.django_get_or_create:
-            return cls._get_or_create(model_class, *args, **kwargs)
-
-        manager = cls._get_manager(model_class)
-        return manager.create(*args, **kwargs)
+            manager = cls._get_manager(model_class)
+            return manager.create(*args, **kwargs)
+        finally:
+            model_class.date_created.field.auto_now_add = True
+            model_class.date_modified.field.auto_now = True
 
     class Meta:
         model = Expense
