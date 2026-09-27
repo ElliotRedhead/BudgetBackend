@@ -21,7 +21,7 @@ _EXPENSE_NAME_CHOICES = (
 class ExpenseFactory(factory.django.DjangoModelFactory):
 
     name = factory.Faker("random_element", elements=_EXPENSE_NAME_CHOICES)
-    cost = factory.Faker("pydecimal", min_value=0, max_value=1000)
+    cost = factory.Faker("pyint", min_value=0, max_value=100000)
     user = factory.SubFactory(UserFactory)
     date = factory.Faker(
         "date_time", tzinfo=pytz.UTC, end_datetime=datetime.date(2016, 5, 28)

@@ -7,10 +7,6 @@ authors = ["Elliot Redhead <elliot@elliotredhead.com>"]
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "budget.settings"
 
-addopts = """
-	--randomly-seed=16345
-	"""
-
 [tool.pydocstyle]
 inherit = false
 ignore = ["D100","D203", "D212"]
