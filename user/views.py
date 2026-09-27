@@ -4,7 +4,7 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from user.serializers import UserSerializer, TokenObtainPairSerializer
+from user.serializers import TokenObtainPairSerializer, UserSerializer
 
 
 class RegisterView(APIView):

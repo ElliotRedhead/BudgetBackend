@@ -18,7 +18,6 @@ _EXPENSE_NAME_CHOICES = (
 
 
 class ExpenseFactory(factory.django.DjangoModelFactory):
-
     name = factory.Faker("random_element", elements=_EXPENSE_NAME_CHOICES)
     cost = factory.Faker("pyint", min_value=0, max_value=100000)
     user = factory.SubFactory(UserFactory)

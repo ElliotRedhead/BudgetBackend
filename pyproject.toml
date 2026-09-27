@@ -16,20 +16,17 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "black>=26.5.1",
     "django-extensions>=4.1",
     "factory-boy>=3.3.3",
     "faker>=40.39.0",
-    "flake8>=7.4.1",
-    "isort>=9.0.1",
     "nplusone>=1.0.0",
     "pre-commit>=4.6.2",
-    "pydocstyle[toml]>=6.3.0",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "pytest-django>=4.14.0",
     "pytest-factoryboy>=2.8.1",
     "pytest-randomly>=5.0.0",
+    "ruff>=0.16.9",
     "werkzeug>=3.1.8",
 ]
 
@@ -39,12 +36,15 @@ package = false
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "budget.test_settings"
 
-[tool.pydocstyle]
-inherit = false
-ignore = ["D100","D203", "D212"]
+[tool.ruff]
+line-length = 88
+extend-exclude = ["*/migrations/*"]
 
-[tool.isort]
-profile = "black"
+[tool.ruff.lint]
+select = ["B", "C90", "E", "F", "I", "W"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 18
 
 [tool.coverage.run]
 source = ["."]
