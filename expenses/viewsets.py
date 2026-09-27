@@ -12,7 +12,12 @@ class ExpenseViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = ExpenseSerializer
     filterset_class = ExpenseFilterset
-    queryset = Expense.objects.all().order_by("-id")
+
+    def get_queryset(self):
+        """Limit every action to the requesting user's expenses."""
+        if getattr(self, "swagger_fake_view", False):
+            return Expense.objects.none()
+        return Expense.objects.filter(user=self.request.user).order_by("-id")
 
     def perform_create(self, serializer):
         """Insert current user for related field on POST."""

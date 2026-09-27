@@ -1,6 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 
+from expenses.models import Expense
 from tests.test_expenses.factories import ExpenseFactory
 from user.models import User
 
@@ -19,15 +20,14 @@ class TestExpenseResponses:
         self.user = User.objects.create(email="user@user.com")
 
     def test_expense_list_response_admin(self):
-        """Global scope lets an admin list every user's expenses."""
-        all_expenses = ExpenseFactory.create_batch(5)
+        """An admin lists only their own expenses, even with the old scope param."""
+        ExpenseFactory.create_batch(3)
+        admin_expense = ExpenseFactory.create(user=self.admin)
         self.client.force_authenticate(user=self.admin)
         response = self.client.get(f"{self.base_url}?scope=global")
 
         assert response.status_code == 200
-        assert {expense["id"] for expense in response.data} == {
-            expense.id for expense in all_expenses
-        }
+        assert [expense["id"] for expense in response.data] == [admin_expense.id]
 
     def test_expense_list_response_user(self):
         """List only the requesting user's expenses, newest first."""
@@ -50,15 +50,25 @@ class TestExpenseResponses:
         assert response.data == []
 
     def test_expense_detail_response_admin(self):
-        """Global scope lets an admin retrieve another user's expense."""
-        other_user_expense, *_ = ExpenseFactory.create_batch(5)
+        """An admin can't retrieve another user's expense through the API."""
+        other_user_expense = ExpenseFactory.create()
         self.client.force_authenticate(user=self.admin)
         response = self.client.get(
             f"{self.base_url}{other_user_expense.id}/?scope=global"
         )
 
-        assert response.status_code == 200
-        assert response.data["id"] == other_user_expense.id
+        assert response.status_code == 404
+
+    def test_expense_delete_not_user_owned(self):
+        """An admin can't delete another user's expense through the API."""
+        other_user_expense = ExpenseFactory.create()
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.delete(
+            f"{self.base_url}{other_user_expense.id}/?scope=global"
+        )
+
+        assert response.status_code == 404
+        assert Expense.objects.filter(id=other_user_expense.id).exists()
 
     def test_expense_detail_response_user_owned(self):
         """Return the owner's expense with a lowercased name and email as user."""
