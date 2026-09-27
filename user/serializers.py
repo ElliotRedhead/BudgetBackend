@@ -17,8 +17,26 @@ class TokenObtainPairSerializer(JwtTokenObtainPairSerializer):
         return token
 
 
-class UserSerializer(serializers.ModelSerializer):
+class RegisterSerializer(serializers.ModelSerializer):
+    """Create a user and respond with a JWT pair, so they're logged in at once."""
+
+    access = serializers.CharField(read_only=True)
+    refresh = serializers.CharField(read_only=True)
+
     class Meta:
         model = get_user_model()
-        fields = ("email", "password")
+        fields = ("email", "password", "access", "refresh")
         extra_kwargs = {"password": {"write_only": True}}
+
+    def create(self, validated_data):
+        """Create the user through the manager so the password is hashed."""
+        return get_user_model().objects.create_user(**validated_data)
+
+    def to_representation(self, instance):
+        """Return the new user's email with a fresh access and refresh token."""
+        refresh = TokenObtainPairSerializer.get_token(instance)
+        return {
+            "email": instance.email,
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+        }

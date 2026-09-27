@@ -1,31 +1,13 @@
-from django.contrib.auth import get_user_model
-from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
-from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from user.serializers import TokenObtainPairSerializer, UserSerializer
+from user.serializers import RegisterSerializer, TokenObtainPairSerializer
 
 
-class RegisterView(APIView):
-    http_method_names = ["post"]
+class RegisterView(CreateAPIView):
+    authentication_classes = []
     permission_classes = []
-
-    def post(self, *args, **kwargs):
-        serializer = UserSerializer(data=self.request.data)
-        if serializer.is_valid():
-            user = get_user_model().objects.create_user(**serializer.validated_data)
-            if user:
-                refresh = TokenObtainPairSerializer.get_token(user)
-                return Response(
-                    {
-                        **serializer.data,
-                        "access": str(refresh.access_token),
-                        "refresh": str(refresh),
-                    },
-                    status=HTTP_201_CREATED,
-                )
-        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+    serializer_class = RegisterSerializer
 
 
 class EmailTokenObtainPairView(TokenObtainPairView):

@@ -48,6 +48,12 @@ jobs:
           uv run ruff check .
           uv run ruff format --check .
           uv run mypy .
+      - name: Check the committed API schema is current
+        env:
+          DJANGO_SETTINGS_MODULE: budget.test_settings
+        run: |
+          uv run python manage.py spectacular --validate --fail-on-warn --file "$RUNNER_TEMP/schema.yml"
+          diff -u schema.yml "$RUNNER_TEMP/schema.yml"
       #----------------------------------------------
       #       Run test suite & upload coverage
       #----------------------------------------------
