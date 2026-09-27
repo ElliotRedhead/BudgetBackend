@@ -14,6 +14,7 @@ class ExpenseAdmin(admin.ModelAdmin, ExportCsvMixin):
     ordering = ("-date",)
     readonly_fields = ("user_link",)
 
+    @admin.display(description="user")
     def user_link(self, obj):
         return format_html(
             '<a href="{}">{}</a>'.format(
@@ -26,5 +27,3 @@ class ExpenseAdmin(admin.ModelAdmin, ExportCsvMixin):
                 obj.user.email,
             )
         )
-
-    user_link.short_description = "user"

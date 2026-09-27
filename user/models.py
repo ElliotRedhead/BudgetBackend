@@ -34,13 +34,13 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
-    username = None
+    username = None  # type: ignore[assignment]  # email replaces username
     email = models.EmailField("email address", unique=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
-    objects = UserManager()
+    objects = UserManager()  # type: ignore[misc,assignment]
 
     def __str__(self):
         return self.email

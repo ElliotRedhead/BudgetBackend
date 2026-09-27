@@ -1,9 +1,11 @@
 import csv
 
+from django.contrib import admin
 from django.http import HttpResponse
 
 
 class ExportCsvMixin:
+    @admin.action(description="Export Selected")
     def export_as_csv(self, request, queryset):
 
         meta = self.model._meta
@@ -18,5 +20,3 @@ class ExportCsvMixin:
             writer.writerow([getattr(obj, field) for field in field_names])
 
         return response
-
-    export_as_csv.short_description = "Export Selected"
