@@ -16,8 +16,6 @@ env.bak/
 venv.bak/
 .python-version
 
-# Docker cache
-database
 
 # Testing coverage
 .coverage

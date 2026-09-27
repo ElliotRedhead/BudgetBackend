@@ -5,12 +5,14 @@ description = "A backend for the Budget project."
 authors = [{ name = "Elliot Redhead", email = "elliot@elliotredhead.com" }]
 requires-python = ">=3.14"
 dependencies = [
+    "dj-database-url>=3.1.2",
     "django>=5.2,<6",
     "django-cors-headers>=4.9.0",
     "django-filter>=26.1",
     "djangorestframework>=3.18.1",
     "djangorestframework-simplejwt>=5.5.1",
     "drf-spectacular>=0.30.0",
+    "psycopg[binary]>=3.3.6",
     "python-dotenv>=1.2.3",
 ]
 

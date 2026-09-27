@@ -12,13 +12,30 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 import os
 from datetime import timedelta
+from importlib.util import find_spec
 from pathlib import Path
 
+import dj_database_url
 from dotenv import load_dotenv
 
 load_dotenv()
 
 _DJANGO_SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+
+
+def _env_bool(name, default=False):
+    """Read a boolean flag such as DJANGO_DEBUG=1 from the environment."""
+    return os.environ.get(name, str(default)).lower() in ("1", "true", "yes")
+
+
+def _env_list(name, default):
+    """Read a comma-separated list from the environment."""
+    return [
+        item.strip()
+        for item in os.environ.get(name, default).split(",")
+        if item.strip()
+    ]
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,12 +48,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = _DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = _env_bool("DJANGO_DEBUG")
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
+ALLOWED_HOSTS = _env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+CORS_ALLOWED_ORIGINS = _env_list("DJANGO_CORS_ALLOWED_ORIGINS", "http://localhost:3000")
+
+# Behind HTTPS (e.g. a hosting platform's TLS proxy), force secure transport.
+if _env_bool("DJANGO_HTTPS"):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # Application definition
@@ -50,10 +73,13 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "django_filters",
-    "django_extensions",
     "drf_spectacular",
     "corsheaders",
 ]
+
+# django-extensions (runserver_plus, shell_plus) is a development dependency.
+if find_spec("django_extensions"):
+    INSTALLED_APPS.append("django_extensions")
 
 CUSTOM_APPS = ["expenses", "user"]
 
@@ -110,11 +136,11 @@ WSGI_APPLICATION = "budget.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+# DATABASE_URL, e.g. postgres://user:password@host:5432/name. SQLite otherwise.
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}", conn_max_age=600
+    )
 }
 
 AUTH_USER_MODEL = "user.User"
