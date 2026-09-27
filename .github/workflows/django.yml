@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  DJANGO_SECRET_KEY: Purp0s3ly_n0T-5ecr3t
-
 jobs:
   test:
     runs-on: ubuntu-latest

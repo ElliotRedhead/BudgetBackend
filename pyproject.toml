@@ -5,7 +5,7 @@ description = "A backend for the Budget project."
 authors = ["Elliot Redhead <elliot@elliotredhead.com>"]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "budget.settings"
+DJANGO_SETTINGS_MODULE = "budget.test_settings"
 
 [tool.pydocstyle]
 inherit = false
