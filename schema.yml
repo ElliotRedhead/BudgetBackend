@@ -10,6 +10,30 @@ paths:
       description: Viewset definition related to Expense model.
       parameters:
       - in: query
+        name: category
+        schema:
+          type: string
+          enum:
+          - eating_out
+          - groceries
+          - health
+          - housing
+          - leisure
+          - other
+          - shopping
+          - transport
+          - utilities
+        description: |-
+          * `groceries` - Groceries
+          * `housing` - Housing
+          * `utilities` - Utilities
+          * `transport` - Transport
+          * `health` - Health
+          * `eating_out` - Eating out
+          * `leisure` - Leisure
+          * `shopping` - Shopping
+          * `other` - Other
+      - in: query
         name: cost__gt
         schema:
           type: integer
@@ -437,6 +461,28 @@ paths:
           description: ''
 components:
   schemas:
+    CategoryEnum:
+      enum:
+      - groceries
+      - housing
+      - utilities
+      - transport
+      - health
+      - eating_out
+      - leisure
+      - shopping
+      - other
+      type: string
+      description: |-
+        * `groceries` - Groceries
+        * `housing` - Housing
+        * `utilities` - Utilities
+        * `transport` - Transport
+        * `health` - Health
+        * `eating_out` - Eating out
+        * `leisure` - Leisure
+        * `shopping` - Shopping
+        * `other` - Other
     Expense:
       type: object
       properties:
@@ -451,6 +497,8 @@ components:
         name:
           type: string
           maxLength: 30
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
         cost:
           type: integer
           maximum: 9223372036854775807
@@ -513,6 +561,8 @@ components:
         name:
           type: string
           maxLength: 30
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
         cost:
           type: integer
           maximum: 9223372036854775807

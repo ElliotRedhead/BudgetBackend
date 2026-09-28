@@ -2,7 +2,7 @@ import datetime
 
 import factory
 
-from expenses.models import Expense
+from expenses.models import Category, Expense
 from tests.test_budget.factories import UserFactory
 
 _EXPENSE_NAME_CHOICES = (
@@ -19,6 +19,7 @@ _EXPENSE_NAME_CHOICES = (
 
 class ExpenseFactory(factory.django.DjangoModelFactory):
     name = factory.Faker("random_element", elements=_EXPENSE_NAME_CHOICES)
+    category = factory.Faker("random_element", elements=Category.values)
     cost = factory.Faker("pyint", min_value=0, max_value=100000)
     user = factory.SubFactory(UserFactory)
     date = factory.Faker(

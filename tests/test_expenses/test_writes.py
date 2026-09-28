@@ -31,6 +31,35 @@ class TestExpenseWrites:
         assert created_expense.name == "rent"
         assert created_expense.cost == 95000
 
+    def test_create_expense_with_category(self):
+        """An expense can be categorised, and defaults to "other"."""
+        categorised = self.client.post(
+            self.base_url, {"name": "Bus", "cost": 250, "category": "transport"}
+        )
+        uncategorised = self.client.post(self.base_url, {"name": "Gift", "cost": 900})
+
+        assert categorised.data["category"] == "transport"
+        assert uncategorised.data["category"] == "other"
+
+    def test_create_expense_rejects_unknown_category(self):
+        """Only the listed categories are accepted."""
+        response = self.client.post(
+            self.base_url, {"name": "Bus", "cost": 250, "category": "bus"}
+        )
+
+        assert response.status_code == 400
+        assert "category" in response.data
+
+    def test_filter_expenses_by_category(self):
+        """The list can be filtered to one category."""
+        transport_expense = ExpenseFactory.create(user=self.user, category="transport")
+        ExpenseFactory.create(user=self.user, category="groceries")
+        response = self.client.get(f"{self.base_url}?category=transport")
+
+        assert [expense["id"] for expense in response.data["results"]] == [
+            transport_expense.id
+        ]
+
     def test_create_expense_rejects_fractional_cost(self):
         """Cost must be whole pence."""
         response = self.client.post(self.base_url, {"name": "Rent", "cost": "1.5"})

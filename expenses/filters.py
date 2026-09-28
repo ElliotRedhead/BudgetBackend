@@ -15,4 +15,5 @@ class ExpenseFilterset(filters.FilterSet):
         fields = {
             "name": ["icontains"],
             "cost": ["lt", "gt"],
+            "category": ["exact"],
         }

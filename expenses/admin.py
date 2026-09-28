@@ -9,7 +9,8 @@ from mixins import ExportCsvMixin
 @admin.register(Expense)
 class ExpenseAdmin(admin.ModelAdmin, ExportCsvMixin):
     actions = ("export_as_csv",)
-    list_display = ("name", "user_link", "date")
+    list_display = ("name", "category", "user_link", "date")
+    list_filter = ("category",)
     search_fields = ("name", "user__email")
     ordering = ("-date",)
     readonly_fields = ("user_link",)

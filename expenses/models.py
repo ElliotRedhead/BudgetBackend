@@ -10,8 +10,23 @@ class LowercaseCharField(models.CharField):
         return str(value).lower()
 
 
+class Category(models.TextChoices):
+    GROCERIES = "groceries", "Groceries"
+    HOUSING = "housing", "Housing"
+    UTILITIES = "utilities", "Utilities"
+    TRANSPORT = "transport", "Transport"
+    HEALTH = "health", "Health"
+    EATING_OUT = "eating_out", "Eating out"
+    LEISURE = "leisure", "Leisure"
+    SHOPPING = "shopping", "Shopping"
+    OTHER = "other", "Other"
+
+
 class Expense(models.Model):
     name = LowercaseCharField(max_length=30, blank=False, null=False)
+    category = models.CharField(
+        max_length=20, choices=Category.choices, default=Category.OTHER
+    )
     cost = models.IntegerField(
         blank=False,
         null=False,
