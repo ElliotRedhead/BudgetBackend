@@ -75,6 +75,33 @@ class TestLogin:
         assert response.status_code == 200
         assert AccessToken(response.data["access"])["user_id"] == self.user.id
 
+    def test_refresh_token_cannot_be_reused(self):
+        """Refreshing rotates the refresh token and revokes the old one."""
+        login_response = self.client.post(
+            "/user/login/", {"email": "user@user.com", "password": self.password}
+        )
+        old_refresh = login_response.data["refresh"]
+
+        first_refresh = self.client.post("/user/refresh/", {"refresh": old_refresh})
+        reused_refresh = self.client.post("/user/refresh/", {"refresh": old_refresh})
+
+        assert first_refresh.status_code == 200
+        assert first_refresh.data["refresh"] != old_refresh
+        assert reused_refresh.status_code == 401
+
+    def test_logout_revokes_refresh_token(self):
+        """After logout the refresh token can't be used again."""
+        login_response = self.client.post(
+            "/user/login/", {"email": "user@user.com", "password": self.password}
+        )
+        refresh = login_response.data["refresh"]
+
+        logout_response = self.client.post("/user/logout/", {"refresh": refresh})
+        refresh_response = self.client.post("/user/refresh/", {"refresh": refresh})
+
+        assert logout_response.status_code == 200
+        assert refresh_response.status_code == 401
+
     def test_refresh_rejects_invalid_token(self):
         """A malformed refresh token is rejected."""
         response = self.client.post("/user/refresh/", {"refresh": "not-a-token"})
