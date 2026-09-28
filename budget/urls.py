@@ -3,10 +3,12 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularJSONAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
+from budgets.urls import router as budgets_router
 from expenses.urls import router as expenses_router
 
 router = DefaultRouter()
 router.registry.extend(expenses_router.registry)
+router.registry.extend(budgets_router.registry)
 
 urlpatterns = [
     path("", include(router.urls)),

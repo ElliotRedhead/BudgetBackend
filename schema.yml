@@ -4,6 +4,175 @@ info:
   version: 0.0.0
   description: DRF backend for budget-management.
 paths:
+  /budgets/:
+    get:
+      operationId: budgets_list
+      description: Monthly budgets belonging to the requesting user.
+      parameters:
+      - in: query
+        name: month
+        schema:
+          type: string
+          format: date
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - budgets
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBudgetList'
+          description: ''
+    post:
+      operationId: budgets_create
+      description: Monthly budgets belonging to the requesting user.
+      tags:
+      - budgets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Budget'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Budget'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Budget'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+  /budgets/{id}/:
+    get:
+      operationId: budgets_retrieve
+      description: Monthly budgets belonging to the requesting user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this budget.
+        required: true
+      tags:
+      - budgets
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+    put:
+      operationId: budgets_update
+      description: Monthly budgets belonging to the requesting user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this budget.
+        required: true
+      tags:
+      - budgets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Budget'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Budget'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Budget'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+    patch:
+      operationId: budgets_partial_update
+      description: Monthly budgets belonging to the requesting user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this budget.
+        required: true
+      tags:
+      - budgets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBudget'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBudget'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBudget'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+    delete:
+      operationId: budgets_destroy
+      description: Monthly budgets belonging to the requesting user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this budget.
+        required: true
+      tags:
+      - budgets
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /expenses/:
     get:
       operationId: expenses_list
@@ -461,6 +630,26 @@ paths:
           description: ''
 components:
   schemas:
+    Budget:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        month:
+          type: string
+          format: date
+          description: The first day of the month budgeted for.
+        amount:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: Budget in smallest denomination. e.g. (£10 = 1000)
+      required:
+      - amount
+      - id
+      - month
     CategoryEnum:
       enum:
       - groceries
@@ -524,6 +713,29 @@ components:
       - id
       - name
       - user
+    PaginatedBudgetList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Budget'
     PaginatedExpenseList:
       type: object
       required:
@@ -547,6 +759,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Expense'
+    PatchedBudget:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        month:
+          type: string
+          format: date
+          description: The first day of the month budgeted for.
+        amount:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: Budget in smallest denomination. e.g. (£10 = 1000)
     PatchedExpense:
       type: object
       properties:

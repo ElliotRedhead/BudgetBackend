@@ -82,7 +82,7 @@ INSTALLED_APPS = [
 if find_spec("django_extensions"):
     INSTALLED_APPS.append("django_extensions")
 
-CUSTOM_APPS = ["expenses", "user"]
+CUSTOM_APPS = ["budgets", "expenses", "user"]
 
 INSTALLED_APPS += CUSTOM_APPS
 
