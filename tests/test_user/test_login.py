@@ -27,6 +27,23 @@ class TestLogin:
         assert AccessToken(response.data["access"])["user_id"] == self.user.id
         assert response.data["refresh"]
 
+    def test_login_ignores_email_case(self):
+        """The email matches however it's cased at login."""
+        response = self.client.post(
+            "/user/login/", {"email": "User@USER.com", "password": self.password}
+        )
+
+        assert response.status_code == 200
+        assert AccessToken(response.data["access"])["user_id"] == self.user.id
+
+    def test_login_rejects_unknown_email(self):
+        """An unknown email is rejected like a wrong password."""
+        response = self.client.post(
+            "/user/login/", {"email": "nobody@user.com", "password": self.password}
+        )
+
+        assert response.status_code == 401
+
     def test_login_rejects_wrong_password(self):
         """A wrong password is rejected without tokens."""
         response = self.client.post(

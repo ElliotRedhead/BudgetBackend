@@ -53,3 +53,24 @@ class TestRegister:
         assert response.status_code == 400
         assert "password" in response.data
         assert not User.objects.filter(email="new@user.com").exists()
+
+    def test_register_stores_email_lowercased(self):
+        """Emails are stored lowercased so each address has one account."""
+        response = self.client.post(
+            self.url, {"email": "New@User.COM", "password": "P4ssw0rd123!"}
+        )
+
+        assert response.status_code == 201
+        assert response.data["email"] == "new@user.com"
+        assert User.objects.filter(email="new@user.com").exists()
+
+    def test_register_rejects_email_differing_only_in_case(self):
+        """A second account can't be registered by changing the email's case."""
+        self.client.post(self.url, self.payload)
+        response = self.client.post(
+            self.url, {"email": "NEW@user.com", "password": "An0ther-P4ssword"}
+        )
+
+        assert response.status_code == 400
+        assert "email" in response.data
+        assert User.objects.count() == 1

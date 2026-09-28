@@ -144,7 +144,6 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = "user.User"
-AUTHENTICATION_BACKENDS = ["user.auth_backends.EmailBackend"]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators

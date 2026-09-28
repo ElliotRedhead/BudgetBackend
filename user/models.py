@@ -10,6 +10,15 @@ class UserManager(BaseUserManager):
     Email is the unique identifier for authentication instead of usernames.
     """
 
+    @classmethod
+    def normalize_email(cls, email):
+        """Lowercase the whole address, so each email maps to one account."""
+        return super().normalize_email(email).lower()
+
+    def get_by_natural_key(self, email):
+        """Find the user for login regardless of how the email is cased."""
+        return self.get(email__iexact=email)
+
     def create_user(self, email, password, **extra_fields):
         """Create and save a User with the given email and password."""
         if not email:

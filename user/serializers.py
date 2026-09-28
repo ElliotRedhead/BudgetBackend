@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer as JwtTokenObtainPairSerializer,
 )
@@ -28,7 +29,16 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ("email", "password", "access", "refresh")
-        extra_kwargs = {"password": {"write_only": True}}
+        extra_kwargs = {
+            "email": {
+                "validators": [
+                    UniqueValidator(
+                        queryset=get_user_model().objects.all(), lookup="iexact"
+                    )
+                ]
+            },
+            "password": {"write_only": True},
+        }
 
     def validate(self, attrs):
         """Apply AUTH_PASSWORD_VALIDATORS, including similarity to the email."""
