@@ -27,7 +27,9 @@ class TestExpenseResponses:
         response = self.client.get(f"{self.base_url}?scope=global")
 
         assert response.status_code == 200
-        assert [expense["id"] for expense in response.data] == [admin_expense.id]
+        assert [expense["id"] for expense in response.data["results"]] == [
+            admin_expense.id
+        ]
 
     def test_expense_list_response_user(self):
         """List only the requesting user's expenses, newest first."""
@@ -37,7 +39,7 @@ class TestExpenseResponses:
         response = self.client.get(self.base_url)
 
         assert response.status_code == 200
-        assert [expense["id"] for expense in response.data] == [
+        assert [expense["id"] for expense in response.data["results"]] == [
             expense.id for expense in reversed(user_expenses)
         ]
 
@@ -47,7 +49,8 @@ class TestExpenseResponses:
         response = self.client.get(self.base_url)
 
         assert response.status_code == 200
-        assert response.data == []
+        assert response.data["count"] == 0
+        assert response.data["results"] == []
 
     def test_expense_detail_response_admin(self):
         """An admin can't retrieve another user's expense through the API."""
@@ -91,3 +94,26 @@ class TestExpenseResponses:
         response = self.client.get(f"{self.base_url}{other_user_expense.id}/")
 
         assert response.status_code == 404
+
+    def test_expense_list_is_paginated(self):
+        """Lists are paged, 20 per page by default and up to 100 on request."""
+        ExpenseFactory.create_batch(25, user=self.user)
+        self.client.force_authenticate(user=self.user)
+
+        first_page = self.client.get(self.base_url)
+        large_page = self.client.get(f"{self.base_url}?page_size=500")
+
+        assert first_page.data["count"] == 25
+        assert len(first_page.data["results"]) == 20
+        assert first_page.data["next"] is not None
+        assert len(large_page.data["results"]) == 25
+
+    def test_expense_list_query_count_is_constant(self, django_assert_num_queries):
+        """Listing doesn't query per expense (one count, one page of rows)."""
+        ExpenseFactory.create_batch(15, user=self.user)
+        self.client.force_authenticate(user=self.user)
+
+        with django_assert_num_queries(2):
+            response = self.client.get(self.base_url)
+
+        assert len(response.data["results"]) == 15
