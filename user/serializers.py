@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer as JwtTokenObtainPairSerializer,
@@ -27,6 +29,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = ("email", "password", "access", "refresh")
         extra_kwargs = {"password": {"write_only": True}}
+
+    def validate(self, attrs):
+        """Apply AUTH_PASSWORD_VALIDATORS, including similarity to the email."""
+        candidate_user = get_user_model()(email=attrs["email"])
+        try:
+            validate_password(attrs["password"], user=candidate_user)
+        except DjangoValidationError as error:
+            raise serializers.ValidationError({"password": error.messages}) from error
+        return attrs
 
     def create(self, validated_data):
         """Create the user through the manager so the password is hashed."""

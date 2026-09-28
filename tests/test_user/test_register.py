@@ -38,3 +38,18 @@ class TestRegister:
         self.client.credentials(HTTP_AUTHORIZATION=f"JWT {response.data['access']}")
 
         assert self.client.get("/expenses/").status_code == 200
+
+    @pytest.mark.parametrize(
+        "weak_password",
+        ["short1!", "password123", "12345678901", "new@user.com1"],
+        ids=["too-short", "common", "numeric", "similar-to-email"],
+    )
+    def test_register_rejects_weak_password(self, weak_password):
+        """Django's password validators run on registration."""
+        response = self.client.post(
+            self.url, {"email": "new@user.com", "password": weak_password}
+        )
+
+        assert response.status_code == 400
+        assert "password" in response.data
+        assert not User.objects.filter(email="new@user.com").exists()
