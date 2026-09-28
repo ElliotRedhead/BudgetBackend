@@ -417,7 +417,7 @@ components:
         cost:
           type: integer
           maximum: 9223372036854775807
-          minimum: -9223372036854775808
+          minimum: 0
           format: int64
           description: Price of expense in smallest denomination. e.g. (£10 = 1000)
         date:
@@ -456,7 +456,7 @@ components:
         cost:
           type: integer
           maximum: 9223372036854775807
-          minimum: -9223372036854775808
+          minimum: 0
           format: int64
           description: Price of expense in smallest denomination. e.g. (£10 = 1000)
         date:

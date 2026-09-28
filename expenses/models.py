@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.timezone import now
 
@@ -15,6 +16,7 @@ class Expense(models.Model):
         blank=False,
         null=False,
         help_text="Price of expense in smallest denomination. e.g. (£10 = 1000)",
+        validators=[MinValueValidator(0)],
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(

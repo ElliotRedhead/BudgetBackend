@@ -38,6 +38,20 @@ class TestExpenseWrites:
         assert response.status_code == 400
         assert "cost" in response.data
 
+    def test_create_expense_rejects_negative_cost(self):
+        """Cost can't be negative."""
+        response = self.client.post(self.base_url, {"name": "Refund", "cost": -500})
+
+        assert response.status_code == 400
+        assert "cost" in response.data
+        assert not Expense.objects.exists()
+
+    def test_create_expense_accepts_zero_cost(self):
+        """A free item can be recorded with zero cost."""
+        response = self.client.post(self.base_url, {"name": "Sample", "cost": 0})
+
+        assert response.status_code == 201
+
     def test_create_expense_requires_authentication(self):
         """Anonymous users can't create expenses."""
         self.client.force_authenticate(user=None)
