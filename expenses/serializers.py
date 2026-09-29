@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from expenses.models import Category, Expense
+from expenses.models import Category, Expense, RecurringExpense
 
 
 class ExpenseSerializer(serializers.ModelSerializer):
@@ -9,6 +9,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Expense
         fields = "__all__"
+        read_only_fields = ("recurring_expense",)
 
 
 class CategoryTotalSerializer(serializers.Serializer):
@@ -40,3 +41,13 @@ class ExpenseImportSerializer(serializers.Serializer):
 
 class ExpenseImportResultSerializer(serializers.Serializer):
     created = serializers.IntegerField()
+
+
+class RecurringExpenseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecurringExpense
+        fields = ("id", "name", "category", "cost", "day_of_month", "active")
+
+
+class AppliedRecurringExpensesSerializer(serializers.Serializer):
+    created = ExpenseSerializer(many=True)

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from expenses.models import Expense
+from expenses.models import Expense, RecurringExpense
 from mixins import ExportCsvMixin
 
 
@@ -28,3 +28,10 @@ class ExpenseAdmin(admin.ModelAdmin, ExportCsvMixin):
                 obj.user.email,
             )
         )
+
+
+@admin.register(RecurringExpense)
+class RecurringExpenseAdmin(admin.ModelAdmin):
+    list_display = ("name", "cost", "day_of_month", "active", "user")
+    list_filter = ("active", "category")
+    search_fields = ("name", "user__email")

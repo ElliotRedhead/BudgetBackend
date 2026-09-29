@@ -18,16 +18,19 @@ from rest_framework.viewsets import ModelViewSet
 from budgets.models import Budget
 from expenses.csv_io import MAX_IMPORT_BYTES, parse_expenses_csv, write_expenses_csv
 from expenses.filters import ExpenseFilterset
-from expenses.models import Expense
+from expenses.models import Expense, RecurringExpense
+from expenses.recurring import apply_recurring_expenses
 from expenses.serializers import (
+    AppliedRecurringExpensesSerializer,
     ExpenseImportResultSerializer,
     ExpenseImportSerializer,
     ExpenseSerializer,
     MonthlySummarySerializer,
+    RecurringExpenseSerializer,
 )
 
 
-def _parse_month(value):
+def parse_month(value):
     """Turn "YYYY-MM" into the first day of that month, defaulting to now."""
     if value is None:
         return timezone.localdate().replace(day=1)
@@ -35,6 +38,11 @@ def _parse_month(value):
         return datetime.datetime.strptime(value, "%Y-%m").date()
     except ValueError as error:
         raise ValidationError({"month": "Use the format YYYY-MM."}) from error
+
+
+_MONTH_PARAMETER = OpenApiParameter(
+    "month", str, description="YYYY-MM. Defaults to the current month."
+)
 
 
 class ExpenseViewSet(ModelViewSet):
@@ -58,18 +66,11 @@ class ExpenseViewSet(ModelViewSet):
         """Insert current user for related field on POST."""
         return serializer.save(user=self.request.user)
 
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "month", str, description="YYYY-MM. Defaults to the current month."
-            )
-        ],
-        responses=MonthlySummarySerializer,
-    )
+    @extend_schema(parameters=[_MONTH_PARAMETER], responses=MonthlySummarySerializer)
     @action(detail=False, pagination_class=None, filterset_class=None)
     def summary(self, request):
         """Total spending for a month against its budget, split by category."""
-        month = _parse_month(request.query_params.get("month"))
+        month = parse_month(request.query_params.get("month"))
         month_expenses = self.get_queryset().filter(
             date__year=month.year, date__month=month.month
         )
@@ -136,3 +137,37 @@ class ExpenseViewSet(ModelViewSet):
             for row_serializer in row_serializers:
                 row_serializer.save(user=request.user)
         return Response({"created": len(row_serializers)}, status=201)
+
+
+class RecurringExpenseViewSet(ModelViewSet):
+    """Monthly repeating expenses belonging to the requesting user."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = RecurringExpenseSerializer
+
+    def get_queryset(self):
+        """Limit every action to the requesting user's recurring expenses."""
+        if getattr(self, "swagger_fake_view", False):
+            return RecurringExpense.objects.none()
+        return RecurringExpense.objects.filter(user=self.request.user).order_by(
+            "day_of_month", "id"
+        )
+
+    def perform_create(self, serializer):
+        """Insert current user for related field on POST."""
+        return serializer.save(user=self.request.user)
+
+    @extend_schema(
+        request=None,
+        parameters=[_MONTH_PARAMETER],
+        responses={201: AppliedRecurringExpensesSerializer},
+    )
+    @action(detail=False, methods=["post"])
+    def apply(self, request):
+        """Add the month's recurring expenses that haven't been added yet."""
+        month = parse_month(request.query_params.get("month"))
+        created_expenses = apply_recurring_expenses(self.get_queryset(), month)
+        return Response(
+            AppliedRecurringExpensesSerializer({"created": created_expenses}).data,
+            status=201,
+        )

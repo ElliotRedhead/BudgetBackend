@@ -453,6 +453,192 @@ paths:
               schema:
                 $ref: '#/components/schemas/MonthlySummary'
           description: ''
+  /recurring-expenses/:
+    get:
+      operationId: recurring_expenses_list
+      description: Monthly repeating expenses belonging to the requesting user.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - recurring-expenses
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRecurringExpenseList'
+          description: ''
+    post:
+      operationId: recurring_expenses_create
+      description: Monthly repeating expenses belonging to the requesting user.
+      tags:
+      - recurring-expenses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecurringExpense'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RecurringExpense'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RecurringExpense'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringExpense'
+          description: ''
+  /recurring-expenses/{id}/:
+    get:
+      operationId: recurring_expenses_retrieve
+      description: Monthly repeating expenses belonging to the requesting user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recurring expense.
+        required: true
+      tags:
+      - recurring-expenses
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringExpense'
+          description: ''
+    put:
+      operationId: recurring_expenses_update
+      description: Monthly repeating expenses belonging to the requesting user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recurring expense.
+        required: true
+      tags:
+      - recurring-expenses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecurringExpense'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RecurringExpense'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RecurringExpense'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringExpense'
+          description: ''
+    patch:
+      operationId: recurring_expenses_partial_update
+      description: Monthly repeating expenses belonging to the requesting user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recurring expense.
+        required: true
+      tags:
+      - recurring-expenses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRecurringExpense'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRecurringExpense'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRecurringExpense'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecurringExpense'
+          description: ''
+    delete:
+      operationId: recurring_expenses_destroy
+      description: Monthly repeating expenses belonging to the requesting user.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this recurring expense.
+        required: true
+      tags:
+      - recurring-expenses
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /recurring-expenses/apply/:
+    post:
+      operationId: recurring_expenses_apply_create
+      description: Add the month's recurring expenses that haven't been added yet.
+      parameters:
+      - in: query
+        name: month
+        schema:
+          type: string
+        description: YYYY-MM. Defaults to the current month.
+      tags:
+      - recurring-expenses
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppliedRecurringExpenses'
+          description: ''
   /schema/:
     get:
       operationId: schema_retrieve
@@ -691,6 +877,15 @@ paths:
           description: ''
 components:
   schemas:
+    AppliedRecurringExpenses:
+      type: object
+      properties:
+        created:
+          type: array
+          items:
+            $ref: '#/components/schemas/Expense'
+      required:
+      - created
     Budget:
       type: object
       properties:
@@ -777,12 +972,18 @@ components:
           type: string
           format: date-time
           readOnly: true
+        recurring_expense:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: The recurring expense this was created from, if any.
       required:
       - cost
       - date_created
       - date_modified
       - id
       - name
+      - recurring_expense
       - user
     ExpenseImport:
       type: object
@@ -881,6 +1082,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Expense'
+    PaginatedRecurringExpenseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecurringExpense'
     PatchedBudget:
       type: object
       properties:
@@ -931,6 +1155,64 @@ components:
           type: string
           format: date-time
           readOnly: true
+        recurring_expense:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: The recurring expense this was created from, if any.
+    PatchedRecurringExpense:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 30
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        cost:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: Price of expense in smallest denomination. e.g. (£10 = 1000)
+        day_of_month:
+          type: integer
+          maximum: 28
+          minimum: 1
+          description: Day the expense is due. Capped at 28 so every month has it.
+        active:
+          type: boolean
+    RecurringExpense:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 30
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        cost:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          description: Price of expense in smallest denomination. e.g. (£10 = 1000)
+        day_of_month:
+          type: integer
+          maximum: 28
+          minimum: 1
+          description: Day the expense is due. Capped at 28 so every month has it.
+        active:
+          type: boolean
+      required:
+      - cost
+      - day_of_month
+      - id
+      - name
     Register:
       type: object
       description: Create a user and respond with a JWT pair, so they're logged in
