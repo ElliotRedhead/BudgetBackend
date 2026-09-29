@@ -392,6 +392,28 @@ paths:
       responses:
         '204':
           description: No response body
+  /expenses/summary/:
+    get:
+      operationId: expenses_summary_retrieve
+      description: Total spending for a month against its budget, split by category.
+      parameters:
+      - in: query
+        name: month
+        schema:
+          type: string
+        description: YYYY-MM. Defaults to the current month.
+      tags:
+      - expenses
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthlySummary'
+          description: ''
   /schema/:
     get:
       operationId: schema_retrieve
@@ -672,6 +694,16 @@ components:
         * `leisure` - Leisure
         * `shopping` - Shopping
         * `other` - Other
+    CategoryTotal:
+      type: object
+      properties:
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        total:
+          type: integer
+      required:
+      - category
+      - total
     Expense:
       type: object
       properties:
@@ -713,6 +745,41 @@ components:
       - id
       - name
       - user
+    MonthlySummary:
+      type: object
+      properties:
+        month:
+          type: string
+          format: date
+          description: The first day of the month.
+        budget:
+          type: integer
+          nullable: true
+          description: The month's budget, or the latest earlier one. Null if none
+            set.
+        budget_month:
+          type: string
+          format: date
+          nullable: true
+          description: The month the budget was set for.
+        total:
+          type: integer
+          description: Total spent in the month.
+        remaining:
+          type: integer
+          nullable: true
+          description: Budget minus total. Null if no budget.
+        by_category:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryTotal'
+      required:
+      - budget
+      - budget_month
+      - by_category
+      - month
+      - remaining
+      - total
     PaginatedBudgetList:
       type: object
       required:
