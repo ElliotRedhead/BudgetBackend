@@ -30,3 +30,13 @@ class MonthlySummarySerializer(serializers.Serializer):
         allow_null=True, help_text="Budget minus total. Null if no budget."
     )
     by_category = CategoryTotalSerializer(many=True)
+
+
+class ExpenseImportSerializer(serializers.Serializer):
+    file = serializers.FileField(
+        help_text="CSV with columns date, name, category, cost (in pounds)."
+    )
+
+
+class ExpenseImportResultSerializer(serializers.Serializer):
+    created = serializers.IntegerField()

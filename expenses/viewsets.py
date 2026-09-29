@@ -1,18 +1,30 @@
+import csv
 import datetime
+import io
 
+from django.db import transaction
 from django.db.models import Sum
+from django.http import HttpResponse
 from django.utils import timezone
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from budgets.models import Budget
+from expenses.csv_io import MAX_IMPORT_BYTES, parse_expenses_csv, write_expenses_csv
 from expenses.filters import ExpenseFilterset
 from expenses.models import Expense
-from expenses.serializers import ExpenseSerializer, MonthlySummarySerializer
+from expenses.serializers import (
+    ExpenseImportResultSerializer,
+    ExpenseImportSerializer,
+    ExpenseSerializer,
+    MonthlySummarySerializer,
+)
 
 
 def _parse_month(value):
@@ -82,3 +94,45 @@ class ExpenseViewSet(ModelViewSet):
             "by_category": list(by_category),
         }
         return Response(MonthlySummarySerializer(summary).data)
+
+    @extend_schema(responses={(200, "text/csv"): OpenApiTypes.STR})
+    @action(detail=False, pagination_class=None)
+    def export(self, request):
+        """Download the (optionally filtered) expenses as CSV, oldest first."""
+        expenses = self.filter_queryset(self.get_queryset()).order_by("date", "id")
+        csv_text = io.StringIO()
+        write_expenses_csv(expenses, csv_text)
+        response = HttpResponse(csv_text.getvalue(), content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="expenses.csv"'
+        return response
+
+    @extend_schema(
+        request=ExpenseImportSerializer,
+        responses={201: ExpenseImportResultSerializer},
+    )
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="import",
+        parser_classes=[MultiPartParser],
+    )
+    def import_csv(self, request):
+        """Create expenses from a CSV upload. Nothing is saved if any row fails."""
+        upload_serializer = ExpenseImportSerializer(data=request.data)
+        upload_serializer.is_valid(raise_exception=True)
+        uploaded_file = upload_serializer.validated_data["file"]
+        if uploaded_file.size > MAX_IMPORT_BYTES:
+            raise ValidationError({"file": "The file must be 1 MB or smaller."})
+
+        try:
+            row_serializers, row_errors = parse_expenses_csv(uploaded_file.file)
+        except (UnicodeDecodeError, csv.Error) as error:
+            raise ValidationError(
+                {"file": "Upload a CSV file saved as UTF-8."}
+            ) from error
+        if row_errors:
+            raise ValidationError({"rows": row_errors})
+        with transaction.atomic():
+            for row_serializer in row_serializers:
+                row_serializer.save(user=request.user)
+        return Response({"created": len(row_serializers)}, status=201)

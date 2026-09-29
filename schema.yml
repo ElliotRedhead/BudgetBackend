@@ -392,6 +392,45 @@ paths:
       responses:
         '204':
           description: No response body
+  /expenses/export/:
+    get:
+      operationId: expenses_export_retrieve
+      description: Download the (optionally filtered) expenses as CSV, oldest first.
+      tags:
+      - expenses
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: ''
+  /expenses/import/:
+    post:
+      operationId: expenses_import_create
+      description: Create expenses from a CSV upload. Nothing is saved if any row
+        fails.
+      tags:
+      - expenses
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExpenseImport'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseImportResult'
+          description: ''
   /expenses/summary/:
     get:
       operationId: expenses_summary_retrieve
@@ -745,6 +784,22 @@ components:
       - id
       - name
       - user
+    ExpenseImport:
+      type: object
+      properties:
+        file:
+          type: string
+          format: uri
+          description: CSV with columns date, name, category, cost (in pounds).
+      required:
+      - file
+    ExpenseImportResult:
+      type: object
+      properties:
+        created:
+          type: integer
+      required:
+      - created
     MonthlySummary:
       type: object
       properties:
