@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from rest_framework.test import APIClient
 
@@ -59,6 +61,38 @@ class TestExpenseWrites:
         assert [expense["id"] for expense in response.data["results"]] == [
             transport_expense.id
         ]
+
+    def test_filter_expenses_by_month_and_name(self):
+        """The list can be narrowed to a month and searched by name."""
+        september_groceries = ExpenseFactory.create(
+            user=self.user,
+            name="Groceries",
+            date=datetime.datetime(2026, 9, 3, tzinfo=datetime.UTC),
+        )
+        ExpenseFactory.create(
+            user=self.user,
+            name="Rent",
+            date=datetime.datetime(2026, 9, 1, tzinfo=datetime.UTC),
+        )
+        ExpenseFactory.create(
+            user=self.user,
+            name="Groceries",
+            date=datetime.datetime(2026, 8, 30, tzinfo=datetime.UTC),
+        )
+
+        response = self.client.get(
+            f"{self.base_url}?month=2026-09&name__icontains=groc"
+        )
+
+        assert [expense["id"] for expense in response.data["results"]] == [
+            september_groceries.id
+        ]
+
+    def test_filter_rejects_malformed_month(self):
+        """The month filter must be YYYY-MM."""
+        response = self.client.get(f"{self.base_url}?month=September")
+
+        assert response.status_code == 400
 
     def test_create_expense_rejects_fractional_cost(self):
         """Cost must be whole pence."""

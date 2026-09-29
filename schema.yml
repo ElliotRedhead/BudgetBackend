@@ -230,6 +230,12 @@ paths:
           * `month` - This month
           * `year` - This year
       - in: query
+        name: month
+        schema:
+          type: string
+          format: date
+        description: Month (YYYY-MM)
+      - in: query
         name: name__icontains
         schema:
           type: string
