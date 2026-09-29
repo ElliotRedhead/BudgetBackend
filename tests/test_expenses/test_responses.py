@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from rest_framework.test import APIClient
 
@@ -32,15 +34,25 @@ class TestExpenseResponses:
         ]
 
     def test_expense_list_response_user(self):
-        """List only the requesting user's expenses, newest first."""
+        """List only the requesting user's expenses, latest date first."""
         ExpenseFactory.create_batch(5)
-        user_expenses = ExpenseFactory.create_batch(2, user=self.user)
+        earlier_expense = ExpenseFactory.create(
+            user=self.user, date=datetime.datetime(2026, 9, 20, tzinfo=datetime.UTC)
+        )
+        later_expense = ExpenseFactory.create(
+            user=self.user, date=datetime.datetime(2026, 9, 21, tzinfo=datetime.UTC)
+        )
+        older_but_added_last = ExpenseFactory.create(
+            user=self.user, date=datetime.datetime(2026, 9, 1, tzinfo=datetime.UTC)
+        )
         self.client.force_authenticate(user=self.user)
         response = self.client.get(self.base_url)
 
         assert response.status_code == 200
         assert [expense["id"] for expense in response.data["results"]] == [
-            expense.id for expense in reversed(user_expenses)
+            later_expense.id,
+            earlier_expense.id,
+            older_but_added_last.id,
         ]
 
     def test_expense_list_empty_response(self):

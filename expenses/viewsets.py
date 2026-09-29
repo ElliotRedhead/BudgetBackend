@@ -59,7 +59,7 @@ class ExpenseViewSet(ModelViewSet):
         return (
             Expense.objects.filter(user=self.request.user)
             .select_related("user")
-            .order_by("-id")
+            .order_by("-date", "-id")
         )
 
     def perform_create(self, serializer):
