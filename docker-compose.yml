@@ -17,7 +17,8 @@ services:
   django:
     build:
       context: .
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    # Resets the demo account (demo@example.com / demo-budget-2026) on each start.
+    command: sh -c "python manage.py migrate && python manage.py seed_demo && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/backend
     ports:
@@ -26,10 +27,27 @@ services:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/budget
       - DJANGO_DEBUG=1
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - DJANGO_CORS_ALLOWED_ORIGINS=http://localhost:${FRONTEND_PORT:-3000}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-local-development-only-secret-key-not-for-production}
     depends_on:
       db:
         condition: service_healthy
+  # Expects BudgetFrontend cloned next to this repository.
+  frontend:
+    build:
+      context: ../BudgetFrontend
+    volumes:
+      - ../BudgetFrontend:/frontend
+      # Named so `down`/`up` reuses it instead of leaving an anonymous volume behind.
+      # After changing package.json: docker volume rm budgetbackend_frontend_node_modules
+      - frontend_node_modules:/frontend/node_modules
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - VITE_API_ROOT=http://localhost:8000
+    depends_on:
+      - django
 
 volumes:
   pgdata:
+  frontend_node_modules:
